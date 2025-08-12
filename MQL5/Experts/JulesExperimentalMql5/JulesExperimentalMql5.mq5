@@ -13,17 +13,17 @@
 //--- EA Input Parameters
 input ulong  InpMagicNumber = 1337;      // Magic Number
 input double InpLotSize     = 0.01;       // Fixed Lot Size
-input int    InpMaxSpread   = 50;         // Maximum allowed spread in points
-input int    InpTakeProfit  = 1000;       // Take Profit in points (if adaptation is off)
-input double InpStopLossRatio = 2.0;      // Stop Loss ratio to Take Profit
+input int    InpMaxSpread   = 50;         // Maximum allowed spread in points (20-100)
+input int    InpTakeProfit  = 1000;       // Take Profit in points (if adaptation is off) (500-5000)
+input double InpStopLossRatio = 2.0;      // Stop Loss ratio to Take Profit (1.0-3.0)
 input string InpDayFilter     = "Mon,Tue,Wed,Thu,Fri"; // Trading days filter (not yet implemented)
 //--- Indicator Settings
-input int    InpRsiPeriod   = 14;         // RSI Period
-input int    InpDivergenceLookback = 50;  // Lookback bars for divergence
+input int    InpRsiPeriod   = 14;         // RSI Period (7-25)
+input int    InpDivergenceLookback = 50;  // Lookback bars for divergence (30-100)
 //--- Parameter Adaptation Settings
 input bool   InpAdaptParameters    = true;       // Adapt TP/SL to volatility?
-input int    InpAtrPeriod          = 14;         // ATR Period for adaptation
-input int    InpAtrHistoryDays     = 30;         // Days of history for ATR analysis
+input int    InpAtrPeriod          = 14;         // ATR Period for adaptation (7-28)
+input int    InpAtrHistoryDays     = 30;         // Days of history for ATR analysis (20-60)
 
 
 //--- Global variables
