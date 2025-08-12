@@ -16,6 +16,7 @@ input double InpLotSize     = 0.01;       // Fixed Lot Size
 input int    InpMaxSpread   = 50;         // Maximum allowed spread in points (20-100)
 input int    InpTakeProfit  = 1000;       // Take Profit in points (if adaptation is off) (500-5000)
 input double InpStopLossRatio = 2.0;      // Stop Loss ratio to Take Profit (1.0-3.0)
+input bool   InpCloseOnBarEnd = false;    // Close any open trade at the end of the bar
 input string InpDayFilter     = "Mon,Tue,Wed,Thu,Fri"; // Trading days filter (not yet implemented)
 //--- Indicator Settings
 input int    InpRsiPeriod   = 14;         // RSI Period (7-25)
@@ -43,6 +44,9 @@ int    atr_handle;
 //--- Adapted Parameters
 double gAdaptedTakeProfit = 0;
 
+//--- Time-based variables
+datetime g_lastBarTime = 0;
+
 //--- Multi-Timeframe settings
 ENUM_TIMEFRAMES g_tf1, g_tf2, g_tf3;
 
@@ -56,6 +60,7 @@ void AdaptParameters();
 int  GetOverallTrend();
 bool CheckDivergence(int trend_direction);
 void ExecuteTrade(int trend_direction);
+void ClosePositionsOnNewBar();
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -73,11 +78,20 @@ int OnInit()
 
 //--- Perform validation checks
    isSymbolOk = CheckSymbol();
-   isTimeframeOk = CheckTimeframe();
-   if(!isSymbolOk || !isTimeframeOk)
+   if(!isSymbolOk)
      {
+      // Update display first to ensure the error message is visible on the chart
       UpdateDisplay();
-      Print(gEaName, ": Initialization failed due to invalid symbol or timeframe.");
+      Print(gEaName, ": Initialization failed. The symbol '", _Symbol, "' is not a valid gold pair. Please use on a chart like XAUUSD or GOLD.");
+      return(INIT_FAILED);
+     }
+
+   isTimeframeOk = CheckTimeframe();
+   if(!isTimeframeOk)
+     {
+      // Update display first to ensure the error message is visible on the chart
+      UpdateDisplay();
+      Print(gEaName, ": Initialization failed. The timeframe '", EnumToString(_Period), "' is not supported. Please use M15, M30, or H1.");
       return(INIT_FAILED);
      }
 
@@ -123,6 +137,9 @@ void OnDeinit(const int reason)
 //+------------------------------------------------------------------+
 void OnTick()
   {
+//--- Handle per-bar logic first
+   ClosePositionsOnNewBar();
+
 //--- Get the latest overall trend
    gOverallTrend = GetOverallTrend();
 
@@ -360,6 +377,40 @@ bool CheckSymbol()
       return true;
 
    return false;
+  }
+//+------------------------------------------------------------------+
+//| Checks for a new bar and closes positions if the setting is on   |
+//+------------------------------------------------------------------+
+void ClosePositionsOnNewBar()
+  {
+//--- Do nothing if the feature is disabled
+   if(!InpCloseOnBarEnd)
+      return;
+
+//--- Check for a new bar
+   datetime currentBarTime = iTime(_Symbol, _Period, 0);
+   if(currentBarTime > g_lastBarTime)
+     {
+      //--- If a new bar is detected, store its time
+      g_lastBarTime = currentBarTime;
+
+      //--- Close all positions for this EA instance
+      for(int i = PositionsTotal() - 1; i >= 0; i--)
+        {
+         ulong ticket = PositionGetTicket(i);
+         if(PositionGetInteger(POSITION_MAGIC) == InpMagicNumber && PositionGetString(POSITION_SYMBOL) == _Symbol)
+           {
+            if(!trade.PositionClose(ticket))
+              {
+               Print("Failed to close position #", ticket, ". Error: ", trade.ResultRetcode());
+              }
+            else
+              {
+               Print("Position #", ticket, " closed on new bar.");
+              }
+           }
+        }
+     }
   }
 //+------------------------------------------------------------------+
 //| Check for RSI divergence in the direction of the trend           |
