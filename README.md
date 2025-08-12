@@ -1,59 +1,67 @@
-# JulesExperimentMql5
+# JulesExperimentMql5 - v2.0
 
 This is an experimental MetaTrader 5 (MT5) Expert Advisor (EA) created by Jules. It is designed to trade gold pairs (XAUUSD, GOLD) using a specific trend-following and divergence strategy.
+
+**This version (v2.0) includes a major overhaul of the risk management and signal detection systems based on performance analysis.**
 
 ## Strategy
 
 The core trading strategy is based on three main components:
 
-1.  **Multi-Timeframe Trend Analysis:** The EA first determines the dominant trend by analyzing three separate timeframes: the one on the chart (`BaseChartTimeFrame`) and two higher timeframes. It uses the 50-period and 200-period Exponential Moving Averages (EMAs) to do this. A trade is only considered if all three timeframes are in agreement (i.e., 50 EMA > 200 EMA for an uptrend on all three).
-2.  **RSI Divergence Entry:** Once a strong trend is established, the EA waits for a temporary pullback or reversal signal in the form of RSI divergence on the `BaseChartTimeFrame`.
-    *   In an **uptrend**, it looks for a **bullish divergence** (price makes a lower low, but the RSI indicator makes a higher low).
-    *   In a **downtrend**, it looks for a **bearish divergence** (price makes a higher high, but the RSI indicator makes a lower high).
-3.  **Trade Execution:** When a divergence signal occurs in the direction of the main trend, the EA executes a trade.
+1.  **Multi-Timeframe Trend Analysis:** The EA first determines the dominant trend by analyzing three separate timeframes. It uses the 50-period and 200-period Exponential Moving Averages (EMAs) to do this. A trade is only considered if all three timeframes are in agreement.
+2.  **Robust RSI Divergence Entry:** Once a strong trend is established, the EA waits for a high-quality pullback signal using RSI divergence.
+    *   **Enhanced Detection:** The EA now uses the standard **Fractals indicator** to identify true swing highs and lows, making the divergence detection much more reliable.
+    *   **RSI Filter:** A divergence signal is only considered valid if it occurs from an **overbought** (for sells) or **oversold** (for buys) RSI level, filtering out weak signals.
+    *   **Logic:** In an **uptrend**, it looks for a **bullish divergence**. In a **downtrend**, it looks for a **bearish divergence**.
+3.  **Trade Execution:** When a valid, filtered divergence signal occurs in the direction of the main trend, the EA executes a trade.
 
-## Features
+## Key Features in v2.0
 
+*   **Dynamic, Risk-Based Position Sizing:** Instead of a fixed lot size, the EA can now calculate the correct lot size for each trade based on a percentage of your account balance that you are willing to risk.
+*   **Greatly Improved Signal Quality:** By using Fractals and RSI level filters, the number of false signals has been significantly reduced.
+*   **Safer Defaults:** The default Stop Loss to Take Profit ratio has been reduced to a more conservative 1.5.
 *   **On-Chart Display:** Shows the EA's status, detected trend, and target TP/SL levels.
 *   **Symbol and Timeframe Validation:** Automatically checks to ensure the EA is running on a Gold pair and a valid timeframe (M15, M30, H1).
-*   **Statistical Parameter Adaptation ("Machine Learning"):** The EA can optionally adapt its Take Profit and Stop Loss levels based on recent market volatility. It does this by calculating the Average True Range (ATR) over the last 30 days (by default) on the D1 timeframe and setting the TP as a multiple of this value. This helps the EA adjust to changing market conditions.
-*   **Customizable Parameters:** All key parameters of the strategy can be configured through the EA's input settings.
+*   **Statistical Parameter Adaptation:** The EA can still optionally adapt its Take Profit and Stop Loss levels based on recent market volatility using ATR.
 
 ## How to Use
 
 ### 1. Installation and Compilation
 
-1.  Place the `JulesExperimentalMql5.mq5` file into the `MQL5/Experts/` directory of your MetaTrader 5 data folder. A sub-folder like `JulesExperimentMql5` is recommended. You can find your data folder by going to `File -> Open Data Folder` in your MT5 terminal.
-2.  Open the **MetaEditor** from within MT5 (or by pressing the F4 key).
-3.  In the MetaEditor's "Navigator" window, find the `JulesExperimentalMql5.mq5` file under `Experts`.
-4.  Double-click the file to open it.
-5.  Press the **F7** key or click the **"Compile"** button.
-6.  If there are no errors, the EA is ready to be used in the MT5 terminal.
+1.  Place the `JulesExperimentalMql5.mq5` file into the `MQL5/Experts/` directory of your MetaTrader 5 data folder.
+2.  Open the **MetaEditor** from within MT5 (or by pressing F4).
+3.  In the MetaEditor's "Navigator" window, find and open the `JulesExperimentalMql5.mq5` file.
+4.  Press **F7** or click the **"Compile"** button.
 
 ### 2. Running in the Strategy Tester
 
-1.  Open the Strategy Tester in MT5 by going to `View -> Strategy Tester` (or pressing Ctrl+R).
-2.  In the "Settings" tab of the tester:
-    *   Select the `JulesExperimentalMql5` expert from the dropdown list.
-    *   **Symbol:** Choose a gold pair, such as `XAUUSD`.
-    *   **Date:** Select the date range you want to backtest.
-    *   **Timeframe:** Choose one of the valid timeframes: `M15`, `M30`, or `H1`.
-    *   **Modelling:** "Every tick" is the most accurate for testing.
-3.  Go to the **"Inputs"** tab to configure the EA's parameters.
-4.  Click the **"Start"** button to run the backtest. You can view the results in the "Graph" and "Backtest" tabs.
+1.  Open the Strategy Tester in MT5 (Ctrl+R).
+2.  Select the `JulesExperimentalMql5` expert.
+3.  **Symbol:** Choose a gold pair, such as `XAUUSD`.
+4.  **Timeframe:** Choose `M15`, `M30`, or `H1`.
+5.  Go to the **"Inputs"** tab to configure the parameters below.
+6.  Click **"Start"** to run the backtest.
 
 ## Input Parameters
 
-Here is a description of all the user-configurable inputs:
+*   `InpMagicNumber`: A unique number to identify trades opened by this EA.
+*   `InpLotSize`: The fixed lot size for each trade. **This is only used if `InpUseRiskPercent` is set to `false`**.
+*   `InpMaxSpread`: The maximum allowed spread in points.
+*   `InpTakeProfit`: The Take Profit in points. This is only used if `InpAdaptParameters` is `false`.
+*   `InpStopLossRatio`: The Stop Loss size as a ratio of the Take Profit (Default: 1.5).
+*   `InpCloseOnBarEnd`: If `true`, closes any open trade at the start of a new bar.
 
-*   `InpMagicNumber`: A unique number to identify trades opened by this specific instance of the EA.
-*   `InpLotSize`: The fixed lot size for each trade.
-*   `InpMaxSpread`: The maximum allowed spread in points. If the current spread is higher, no trades will be opened.
-*   `InpTakeProfit`: The Take Profit in points. This is only used if `InpAdaptParameters` is set to `false`.
-*   `InpStopLossRatio`: The Stop Loss size as a ratio of the Take Profit. For example, a value of `2.0` means the Stop Loss will be twice as large as the Take Profit.
-*   `InpDayFilter`: (Not yet implemented) A placeholder for future development to restrict trading to certain days.
+### Risk Management
+*   `InpUseRiskPercent`: If `true`, the EA will automatically calculate the lot size based on `InpRiskPercent`. If `false`, it will use the fixed `InpLotSize`.
+*   `InpRiskPercent`: The percentage of the account balance to risk on a single trade (e.g., 1.0 = 1% risk).
+
+### Indicator Settings
 *   `InpRsiPeriod`: The period for the RSI indicator.
 *   `InpDivergenceLookback`: The number of bars to look back on to find a divergence pattern.
-*   `InpAdaptParameters`: Set to `true` to enable the automatic TP/SL adaptation based on volatility. Set to `false` to use the fixed `InpTakeProfit` value.
-*   `InpAtrPeriod`: The period for the ATR indicator used in parameter adaptation.
+*   `InpRsiOverbought`: The RSI level above which a bearish divergence is considered valid.
+*   `InpRsiOversold`: The RSI level below which a bullish divergence is considered valid.
+
+### Parameter Adaptation Settings
+*   `InpAdaptParameters`: Set to `true` to enable the automatic TP/SL adaptation based on volatility (ATR).
+*   `InpAtrPeriod`: The period for the ATR indicator.
 *   `InpAtrHistoryDays`: The number of days of history to analyze for the ATR calculation.

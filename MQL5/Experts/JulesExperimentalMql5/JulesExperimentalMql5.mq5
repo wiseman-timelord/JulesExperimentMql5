@@ -5,22 +5,28 @@
 //+------------------------------------------------------------------+
 #property copyright "Copyright 2024, Your Name (Jules)"
 #property link      "https://www.example.com"
-#property version   "1.00"
-#property description "An experimental EA for gold trading, using multi-timeframe trend analysis and RSI divergence."
+#property version   "2.00"
+#property description "An experimental EA for gold trading, using multi-timeframe trend analysis and robust, fractal-based RSI divergence."
 
 #include <Trade/Trade.mqh>
 
 //--- EA Input Parameters
 input ulong  InpMagicNumber = 1337;      // Magic Number
-input double InpLotSize     = 0.01;       // Fixed Lot Size
+input double InpLotSize     = 0.01;       // Fixed Lot Size (if not using % risk)
 input int    InpMaxSpread   = 50;         // Maximum allowed spread in points (20-100)
 input int    InpTakeProfit  = 1000;       // Take Profit in points (if adaptation is off) (500-5000)
-input double InpStopLossRatio = 2.0;      // Stop Loss ratio to Take Profit (1.0-3.0)
+input double InpStopLossRatio = 1.5;      // Stop Loss ratio to Take Profit (1.0-3.0)
 input bool   InpCloseOnBarEnd = false;    // Close any open trade at the end of the bar
+//--- Risk Management
+input bool   InpUseRiskPercent = true;    // Use % of balance for lot size?
+input double InpRiskPercent    = 1.0;     // Percent of balance to risk per trade (0.5-5.0)
+//--- Day Filter
 input string InpDayFilter     = "Mon,Tue,Wed,Thu,Fri"; // Trading days filter (not yet implemented)
 //--- Indicator Settings
 input int    InpRsiPeriod   = 14;         // RSI Period (7-25)
 input int    InpDivergenceLookback = 50;  // Lookback bars for divergence (30-100)
+input int    InpRsiOverbought = 70;       // RSI level for bearish divergence
+input int    InpRsiOversold   = 30;       // RSI level for bullish divergence
 //--- Parameter Adaptation Settings
 input bool   InpAdaptParameters    = true;       // Adapt TP/SL to volatility?
 input int    InpAtrPeriod          = 14;         // ATR Period for adaptation (7-28)
@@ -40,6 +46,7 @@ int    ema50_handle_tf2, ema200_handle_tf2;
 int    ema50_handle_tf3, ema200_handle_tf3;
 int    rsi_handle;
 int    atr_handle;
+int    fractals_handle;
 
 //--- Adapted Parameters
 double gAdaptedTakeProfit = 0;
@@ -58,9 +65,11 @@ bool SetTimeframes();
 bool CreateIndicatorHandles();
 void AdaptParameters();
 int  GetOverallTrend();
-bool CheckDivergence(int trend_direction);
+bool CheckBullishDivergence();
+bool CheckBearishDivergence();
 void ExecuteTrade(int trend_direction);
 void ClosePositionsOnNewBar();
+double CalculateLotSize(double sl_distance_points);
 
 //+------------------------------------------------------------------+
 //| Expert initialization function                                   |
@@ -131,6 +140,7 @@ void OnDeinit(const int reason)
    IndicatorRelease(ema200_handle_tf3);
    IndicatorRelease(rsi_handle);
    IndicatorRelease(atr_handle);
+   IndicatorRelease(fractals_handle);
   }
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
@@ -148,12 +158,23 @@ void OnTick()
 
 //--- Core trading logic
    //--- We only check for trades if we have a clear trend and no open positions
-   if(gOverallTrend != 0 && PositionsTotal() == 0)
+   if(PositionsTotal() == 0)
      {
-      bool divergence_found = CheckDivergence(gOverallTrend);
-      if(divergence_found)
+      //--- In a confirmed uptrend, look for a bullish divergence to enter long
+      if(gOverallTrend == 1)
         {
-         ExecuteTrade(gOverallTrend);
+         if(CheckBullishDivergence())
+           {
+            ExecuteTrade(gOverallTrend);
+           }
+        }
+      //--- In a confirmed downtrend, look for a bearish divergence to enter short
+      else if(gOverallTrend == -1)
+        {
+         if(CheckBearishDivergence())
+           {
+            ExecuteTrade(gOverallTrend);
+           }
         }
      }
   }
@@ -215,6 +236,18 @@ void ExecuteTrade(int trend_direction)
    double tp_distance_points = InpAdaptParameters ? gAdaptedTakeProfit : InpTakeProfit * _Point;
    double sl_distance_points = tp_distance_points * InpStopLossRatio;
 
+   //--- Calculate Lot Size
+   double lot_size = InpLotSize;
+   if(InpUseRiskPercent)
+     {
+      lot_size = CalculateLotSize(sl_distance_points);
+     }
+   if(lot_size <= 0)
+     {
+      Print("Lot size calculation failed. Lot size is zero or negative. Trade aborted.");
+      return;
+     }
+
    //--- Determine trade type and prices
    ENUM_ORDER_TYPE trade_type;
    double entry_price = 0;
@@ -238,15 +271,62 @@ void ExecuteTrade(int trend_direction)
 
    //--- Execute trade
    string comment = gEaName + " " + TimeToString(TimeCurrent());
-   trade.PositionOpen(_Symbol, trade_type, InpLotSize, entry_price, sl_price, tp_price, comment);
+   trade.PositionOpen(_Symbol, trade_type, lot_size, entry_price, sl_price, tp_price, comment);
    if(trade.ResultRetcode() != TRADE_RETCODE_DONE)
      {
       Print("Trade execution failed. Error: ", trade.ResultRetcode(), " - ", trade.ResultComment());
      }
    else
      {
-      Print("Trade executed successfully. Order #", trade.ResultOrder());
+      Print("Trade executed successfully. Order #", trade.ResultOrder(), " Lot Size: ", lot_size);
      }
+  }
+//+------------------------------------------------------------------+
+//| Calculate Lot Size based on risk percentage and SL distance      |
+//+------------------------------------------------------------------+
+double CalculateLotSize(double sl_distance_points)
+  {
+   if(sl_distance_points <= 0)
+     {
+      Print("Cannot calculate lot size: Stop Loss distance is zero or negative.");
+      return 0.0;
+     }
+
+   //--- Account and symbol info
+   double account_balance = AccountInfoDouble(ACCOUNT_BALANCE);
+   double tick_value = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE);
+   double tick_size = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_SIZE);
+   double lot_step = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_STEP);
+   double min_lot = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
+   double max_lot = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MAX);
+
+   if(tick_value <= 0)
+     {
+      Print("Cannot calculate lot size: Tick value is zero or negative.");
+      return 0.0;
+     }
+
+   //--- Risk calculation
+   double risk_amount = account_balance * (InpRiskPercent / 100.0);
+   double sl_value_per_lot = (sl_distance_points / tick_size) * tick_value;
+
+   if(sl_value_per_lot <= 0)
+     {
+      Print("Cannot calculate lot size: Stop loss value per lot is zero or negative.");
+      return 0.0;
+     }
+
+   double lot_size = risk_amount / sl_value_per_lot;
+
+   //--- Normalize and validate lot size
+   lot_size = floor(lot_size / lot_step) * lot_step;
+
+   if(lot_size < min_lot)
+      lot_size = min_lot;
+   if(lot_size > max_lot)
+      lot_size = max_lot;
+
+   return lot_size;
   }
 //+------------------------------------------------------------------+
 //| Set the higher timeframes based on the chart's period            |
@@ -299,6 +379,10 @@ bool CreateIndicatorHandles()
 //--- ATR handle for parameter adaptation
    atr_handle = iATR(_Symbol, PERIOD_D1, InpAtrPeriod);
    if(atr_handle == INVALID_HANDLE) return false;
+
+//--- Fractals handle for divergence detection
+   fractals_handle = iFractals(_Symbol, g_tf1);
+   if(fractals_handle == INVALID_HANDLE) return false;
 
    Print("Indicator handles created successfully.");
    return true;
@@ -413,107 +497,109 @@ void ClosePositionsOnNewBar()
      }
   }
 //+------------------------------------------------------------------+
-//| Check for RSI divergence in the direction of the trend           |
+//| Check for bullish RSI divergence using Fractals                      |
 //+------------------------------------------------------------------+
-bool CheckDivergence(int trend_direction)
+bool CheckBullishDivergence()
   {
-   //--- Buffers for price and RSI data
+   //--- Buffers for indicator data
    double rsi_buffer[];
-   double high_buffer[];
+   double fractal_buffer[];
    double low_buffer[];
 
-   //--- Copy the last N bars of data
-   int bars_to_copy = InpDivergenceLookback + 5; // A little extra for safety
+   //--- Copy data
+   int bars_to_copy = InpDivergenceLookback;
    if(CopyBuffer(rsi_handle, 0, 0, bars_to_copy, rsi_buffer) < bars_to_copy) return false;
-   if(CopyHigh(_Symbol, g_tf1, 0, bars_to_copy, high_buffer) < bars_to_copy) return false;
+   if(CopyBuffer(fractals_handle, 1, 0, bars_to_copy, fractal_buffer) < bars_to_copy) return false; // Lower fractals
    if(CopyLow(_Symbol, g_tf1, 0, bars_to_copy, low_buffer) < bars_to_copy) return false;
 
-   //--- MQL5 copies data backwards, so we need to reverse it for logical processing
-   ArraySetAsSeries(rsi_buffer, true);
-   ArraySetAsSeries(high_buffer, true);
-   ArraySetAsSeries(low_buffer, true);
+   //--- Find the two most recent lower fractals
+   int low2_idx = -1, low1_idx = -1;
 
-   //--- Bullish Divergence check (for an uptrend)
-   if(trend_direction == 1)
+   //--- Find the most recent fractal (low 2), starting from bar 3 to avoid current forming fractal
+   for(int i = 3; i < bars_to_copy; i++)
      {
-      // Find the most recent price low (low 2) in the last few bars
-      int low2_idx = -1;
-      double low2_price = 999999;
-      for(int i = 1; i < 10; i++) // Look in the last 10 bars for the most recent low
+      if(fractal_buffer[i] != 0)
         {
-         if(low_buffer[i] < low2_price)
-           {
-            low2_price = low_buffer[i];
-            low2_idx = i;
-           }
-        }
-      if(low2_idx == -1) return false;
-
-      // Find the previous price low (low 1) before low 2
-      int low1_idx = -1;
-      double low1_price = 999999;
-      for(int i = low2_idx + 3; i < InpDivergenceLookback; i++) // Start searching after low2
-        {
-         if(low_buffer[i] < low1_price)
-           {
-            low1_price = low_buffer[i];
-            low1_idx = i;
-           }
-        }
-      if(low1_idx == -1) return false;
-
-      // Check for divergence conditions
-      // 1. Price made a lower low
-      bool price_lower_low = low2_price < low1_price;
-      // 2. RSI made a higher low
-      bool rsi_higher_low = rsi_buffer[low2_idx] > rsi_buffer[low1_idx];
-
-      if(price_lower_low && rsi_higher_low)
-        {
-         Print("Bullish Divergence Detected: Price Lows at bar ", low1_idx, "(",low1_price,") and bar ",low2_idx,"(",low2_price,"). RSI Lows: ", rsi_buffer[low1_idx], " and ", rsi_buffer[low2_idx]);
-         return true;
+         low2_idx = i;
+         break;
         }
      }
-   //--- Bearish Divergence check (for a downtrend)
-   else if(trend_direction == -1)
+   if(low2_idx == -1) return false; // No recent fractal found
+
+   //--- Find the fractal before that (low 1)
+   for(int i = low2_idx + 1; i < bars_to_copy; i++)
      {
-      // Find the most recent price high (high 2)
-      int high2_idx = -1;
-      double high2_price = 0;
-      for(int i = 1; i < 10; i++)
+      if(fractal_buffer[i] != 0)
         {
-         if(high_buffer[i] > high2_price)
-           {
-            high2_price = high_buffer[i];
-            high2_idx = i;
-           }
+         low1_idx = i;
+         break;
         }
-      if(high2_idx == -1) return false;
+     }
+   if(low1_idx == -1) return false; // Only one fractal found in lookback period
 
-      // Find the previous price high (high 1)
-      int high1_idx = -1;
-      double high1_price = 0;
-      for(int i = high2_idx + 3; i < InpDivergenceLookback; i++)
+   //--- Now check the conditions for bullish divergence
+   bool price_lower_low = low_buffer[low2_idx] < low_buffer[low1_idx];
+   bool rsi_higher_low = rsi_buffer[low2_idx] > rsi_buffer[low1_idx];
+   bool rsi_is_oversold = rsi_buffer[low2_idx] < InpRsiOversold || rsi_buffer[low1_idx] < InpRsiOversold;
+
+   if(price_lower_low && rsi_higher_low && rsi_is_oversold)
+     {
+      Print("Bullish Divergence Confirmed: Price(", DoubleToString(low_buffer[low1_idx]), " -> ", DoubleToString(low_buffer[low2_idx]), "), RSI(", DoubleToString(rsi_buffer[low1_idx]), " -> ", DoubleToString(rsi_buffer[low2_idx]), ")");
+      return true;
+     }
+
+   return false;
+  }
+//+------------------------------------------------------------------+
+//| Check for bearish RSI divergence using Fractals                     |
+//+------------------------------------------------------------------+
+bool CheckBearishDivergence()
+  {
+   //--- Buffers for indicator data
+   double rsi_buffer[];
+   double fractal_buffer[];
+   double high_buffer[];
+
+   //--- Copy data
+   int bars_to_copy = InpDivergenceLookback;
+   if(CopyBuffer(rsi_handle, 0, 0, bars_to_copy, rsi_buffer) < bars_to_copy) return false;
+   if(CopyBuffer(fractals_handle, 0, 0, bars_to_copy, fractal_buffer) < bars_to_copy) return false; // Upper fractals
+   if(CopyHigh(_Symbol, g_tf1, 0, bars_to_copy, high_buffer) < bars_to_copy) return false;
+
+   //--- Find the two most recent upper fractals
+   int high2_idx = -1, high1_idx = -1;
+
+   //--- Find the most recent fractal (high 2)
+   for(int i = 3; i < bars_to_copy; i++)
+     {
+      if(fractal_buffer[i] != 0)
         {
-         if(high_buffer[i] > high1_price)
-           {
-            high1_price = high_buffer[i];
-            high1_idx = i;
-           }
+         high2_idx = i;
+         break;
         }
-      if(high1_idx == -1) return false;
+     }
+   if(high2_idx == -1) return false;
 
-      // Check for divergence conditions
-      // 1. Price made a higher high
-      bool price_higher_high = high2_price > high1_price;
-      // 2. RSI made a lower high
-      bool rsi_lower_high = rsi_buffer[high2_idx] < rsi_buffer[high1_idx];
-
-      if(price_higher_high && rsi_lower_high)
+   //--- Find the fractal before that (high 1)
+   for(int i = high2_idx + 1; i < bars_to_copy; i++)
+     {
+      if(fractal_buffer[i] != 0)
         {
-         Print("Bearish Divergence Detected: Price Highs at bar ", high1_idx, "(",high1_price,") and bar ",high2_idx,"(",high2_price,"). RSI Highs: ", rsi_buffer[high1_idx], " and ", rsi_buffer[high2_idx]);
-         return true;
+         high1_idx = i;
+         break;
         }
+     }
+   if(high1_idx == -1) return false;
+
+   //--- Now check the conditions for bearish divergence
+   bool price_higher_high = high_buffer[high2_idx] > high_buffer[high1_idx];
+   bool rsi_lower_high = rsi_buffer[high2_idx] < rsi_buffer[high1_idx];
+   bool rsi_is_overbought = rsi_buffer[high2_idx] > InpRsiOverbought || rsi_buffer[high1_idx] > InpRsiOverbought;
+
+   if(price_higher_high && rsi_lower_high && rsi_is_overbought)
+     {
+      Print("Bearish Divergence Confirmed: Price(", DoubleToString(high_buffer[high1_idx]), " -> ", DoubleToString(high_buffer[high2_idx]), "), RSI(", DoubleToString(rsi_buffer[high1_idx]), " -> ", DoubleToString(rsi_buffer[high2_idx]), ")");
+      return true;
      }
 
    return false;
