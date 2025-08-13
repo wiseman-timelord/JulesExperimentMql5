@@ -59,3 +59,7 @@ Its an experiment, to see if Jules can automate making a profitable EA. This is 
 - Occasional focus on keeeping things optimized.
 - Repeat checks for soundness/logic of code, ensuring Mql5 is the format.
 - I still not sure if the results are trustworthy yet, live testing on demo account required.
+
+### Credits/links
+- [Jules AI](https://jules.google.com) was used, it did all the thinking, produce the bulk of the code, then bugfixed it before first response, which if any issues with, can be thrown into other AI simple, as just 1 script.
+- Other AI such as, Kimi, Claude, Gpt, were used, mainly for mainly bugfix, thus enabling repaste into Jules, where jules could then be used. 
