@@ -13,7 +13,7 @@ Its an experiment, to see if Jules can automate making a profitable EA. This is 
 5. After configuration Then click start, though this may take several hours even on a 20 thread processor due to every tick data.
 - OHLC may be ok if you select "Close At End Of Bar" to "True" in the EA, and it may be somewhat acurate with M1 OHLC, but personally I am going by the "Every Tick"
 
-### Input Params
+### Input Params (not in the correct order currently)
 *   `InpBaseTimeframe`: The core timeframe for the EA's logic (M15, M30, etc.).
 *   `InpMagicNumber`: A unique number to identify trades opened by this EA.
 *   `InpLotSize`: The fixed lot size. Only used if `InpUseRiskPercent` is `false`.
