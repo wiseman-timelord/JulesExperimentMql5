@@ -5,11 +5,11 @@ Status: Experimental
 This is an experimental MetaTrader 5 (MT5) Expert Advisor (EA) created by Jules (primary) + Claude + GPT. It is designed to trade gold pairs (XAUUSD, GOLD) using a specific trend-following and divergence strategy. It detects general trends, checks for divergence and is supposed to place an order in general trend direction when it returns to trend direction, in order to trade in direction with logical rebound protection. The idea is to improve bad trade avoidance, while improving general soundness.
 
 ## How to Use
-1.  Place the `JulesExperimentalMql5_###.mq5` into your `MQL5/Experts/` directory.
+1.  Place all `JulesExperimentalMql5_###.mq5` files into your `MQL5/Experts/` directory (you can place the `_001` and `_002` files into a subfolder like `Archived/`).
 2.  Open the **MetaEditor** (F4).
-3.  In the Navigator, find and open `JulesExperimentalMql5_###.mq5`.
+3.  In the Navigator, find and open `JulesExperimentalMql5_003.mq5`.
 4.  click **"Compile"**.
-5.  In the MT5 Strategy Tester (Ctrl+R), select the `JulesExperimentalMql5_###` expert to test the latest version.
+5.  In the MT5 Strategy Tester (Ctrl+R), select the `JulesExperimentalMql5_003` expert to test the latest version.
 
 ## Input Parameters
 *   `InpBaseTimeframe`: The core timeframe for the EA's logic (M15, M30, etc.).
@@ -35,7 +35,6 @@ This is an experimental MetaTrader 5 (MT5) Expert Advisor (EA) created by Jules 
 *   `InpVolatilityMultiplier`: The multiplier for the ATR value when calculating the adapted TP.
 
 ### Revisions
-- 001 - first working version ~1500 from 1000 in 1 year.
-- 002 - supposedly corrupt version, earns 12000 from 1000 in 1 year. Interesting but not useful.
-- 003 - 1600 from 1000 in 1 year (before adding timeframe filter). Improved version.
-- 003 (This version) - Adds selectable base timeframe for all logic.
+- **001 (Archived)** - First major refactor. Introduced robust risk management (risk %) and greatly improved divergence detection using Fractals and RSI level filters.
+- **002 (Archived)** - Added enum-based Day Filter and refactored logic for on-bar calculations to improve efficiency.
+- **003 (Active)** - Based on a new, improved baseline from user. Adds a selectable base timeframe (`InpBaseTimeframe`) to decouple the EA's logic from the chart's timeframe.

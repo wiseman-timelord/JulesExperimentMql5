@@ -65,7 +65,7 @@ input double InpVolatilityMultiplier = 1.2;     // ATR multiplier for TP - Gold 
 //--- Global variables
 CTrade          trade;
 bool            isSymbolOk = false;
-//bool            isTimeframeOk = false; // No longer needed
+bool            isTimeframeOk = false;
 string          gEaName = "JulesExperimentalMql5_v3";
 int             gOverallTrend = 0; // 1 for UP, -1 for DOWN, 0 for NONE
 
@@ -212,7 +212,7 @@ void OnDeinit(const int reason)
 void OnTick()
   {
 //--- Check for a new bar and run maintenance
-   datetime currentBarTime = iTime(_Symbol, (ENUM_TIMEFRAMES)InpBaseTimeframe, 0);
+   datetime currentBarTime = iTime(_Symbol, _Period, 0);
    if(currentBarTime > g_lastBarTime)
      {
       g_lastBarTime = currentBarTime;
@@ -456,8 +456,10 @@ void UpdateDisplay()
       displayString += "Error: Gold Pair Only (e.g., XAUUSD, GOLD)\n";
 
 //--- Display Timeframe Info
-   displayString += "Base TF: " + EnumToString((ENUM_TIMEFRAMES)InpBaseTimeframe) + " | Chart TF: " + EnumToString(_Period) + "\n";
-   displayString += "Higher TFs: " + EnumToString(g_tf2) + ", " + EnumToString(g_tf3) + "\n";
+   if(isTimeframeOk)
+      displayString += "TF: " + EnumToString(_Period) + " (" + EnumToString(g_tf2) + ", " + EnumToString(g_tf3) + ")\n";
+   else
+      displayString += "Error: TimeFrames M15, M30, H1 only\n";
 
 //--- Display Trend Info
    string trend_status = "Calculating...";
@@ -596,16 +598,12 @@ double CalculateLotSize(double sl_distance_points)
 //+------------------------------------------------------------------+
 bool SetTimeframes()
   {
-   g_tf1 = (ENUM_TIMEFRAMES)InpBaseTimeframe;
+   g_tf1 = _Period;
    switch(g_tf1)
      {
       case PERIOD_M15:
          g_tf2 = PERIOD_M30;
          g_tf3 = PERIOD_H1;
-         break;
-      case PERIOD_M20:
-         g_tf2 = PERIOD_H1;
-         g_tf3 = PERIOD_H2;
          break;
       case PERIOD_M30:
          g_tf2 = PERIOD_H1;
@@ -614,10 +612,6 @@ bool SetTimeframes()
       case PERIOD_H1:
          g_tf2 = PERIOD_H4;
          g_tf3 = PERIOD_D1;
-         break;
-      case PERIOD_H2:
-         g_tf2 = PERIOD_H4;
-         g_tf3 = PERIOD_H6;
          break;
       default:
          return false;
@@ -685,13 +679,11 @@ void AdaptParameters()
 
 //--- Adapt TP to volatility (scale by timeframe)
    double timeframe_multiplier = 1.0;
-   switch((ENUM_TIMEFRAMES)InpBaseTimeframe)
+   switch(_Period)
      {
       case PERIOD_M15: timeframe_multiplier = 0.3; break;
-      case PERIOD_M20: timeframe_multiplier = 0.4; break;
       case PERIOD_M30: timeframe_multiplier = 0.5; break;
       case PERIOD_H1:  timeframe_multiplier = 1.0; break;
-      case PERIOD_H2:  timeframe_multiplier = 1.5; break;
       default: timeframe_multiplier = 1.0; break;
      }
 
@@ -821,19 +813,8 @@ void OnNewBar()
 //+------------------------------------------------------------------+
 bool CheckTimeframe()
   {
-   ENUM_TIMEFRAMES tf = (ENUM_TIMEFRAMES)InpBaseTimeframe;
-   //--- This function now validates the INPUT, not the chart timeframe
-   switch(tf)
-     {
-      case PERIOD_M15:
-      case PERIOD_M20:
-      case PERIOD_M30:
-      case PERIOD_H1:
-      case PERIOD_H2:
-         return true;
-      default:
-         return false;
-     }
+   ENUM_TIMEFRAMES tf = _Period;
+   return (tf == PERIOD_M15 || tf == PERIOD_M30 || tf == PERIOD_H1);
   }
 
 //+------------------------------------------------------------------+
