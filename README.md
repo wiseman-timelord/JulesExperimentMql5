@@ -2,7 +2,7 @@
 Status: Alpha, major updates going on until further notice.
 
 Description:
-Its an experiment, to see if Jules can automate making a profitable EA. This is main branch you are reading, while [THIS](https://github.com/wiseman-timelord/JulesExperimentMql5/tree/feat/jules-experimental-ea) is the active Jules branch. As the name suggests, this is an experimental MetaTrader 5 (MT5) Expert Advisor (EA) created by Jules (primary) + Claude + GPT. It is designed to trade gold pairs (XAUUSD, GOLD) using a specific trend-following and divergence strategy. It detects general trends, checks for divergence and is supposed to place an order in general trend direction when it returns to trend direction, in order to trade in direction with logical rebound protection. The idea is to improve bad trade avoidance, while improving general soundness.
+Its an experiment, to see if Jules can automate making a profitable EA. This is main branch you are reading, while [THIS](https://github.com/wiseman-timelord/JulesExperimentMql5/tree/feat/jules-experimental-ea) is the active Jules branch. As the name suggests, this is an experimental MetaTrader 5 (MT5) Expert Advisor (EA) created by Jules (primary) + Claude + GPT. It is designed to trade gold pairs (XAUUSD, GOLD) using a specific trend-following and divergence strategy. It detects general trends, checks for divergence and is supposed to place an order in general trend direction when it returns to trend direction, in order to trade in direction with logical rebound protection. 
 
 ## How to Use
 1.  Place all `JulesExperimentalMql5_###.mq5` files into your `MQL5/Experts/` directory (you can place the `_001` and `_002` files into a subfolder like `Archived/`).
@@ -41,8 +41,7 @@ Its an experiment, to see if Jules can automate making a profitable EA. This is 
 .\Archive\JulesGptClaude-Mql5-Experiment_#.##.mq5 (archive)
 ```
 
-## Revisions
-Jules lost the archive during update, so, this is being revised... 
-- **001 (Archived)** - First major refactor. Introduced robust risk management (risk %) and greatly improved divergence detection using Fractals and RSI level filters.
-- **002 (Archived)** - Added enum-based Day Filter and refactored logic for on-bar calculations to improve efficiency.
-- **003 (Active)** - Based on a new, improved baseline from user. Adds a selectable base timeframe (`InpBaseTimeframe`) to decouple the EA's logic from the chart's timeframe.
+### Development
+- The perception is it needs to improve bad trade avoidance.
+- Occasional focus on keeeping things optimized.
+- Repeat checks for soundness/logic of code, ensuring Mql5 is the format.
