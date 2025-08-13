@@ -9,7 +9,7 @@ Until Live testing is done, nothing is known for sure, but backtests are showing
 
 ![Image Of Backtest 1000-10000](./Media/ResultsFrom1000.jpg)
 
-and from £100 to £600, in 1 year...
+...and from £100 to £600, in 1 year...
 
 ![Image Of Backtest 1000-10000](./Media/ResultsFrom100.jpg)
 
