@@ -41,7 +41,8 @@ Its an experiment, to see if Jules can automate making a profitable EA. This is 
 .\Archive\JulesGptClaude-Mql5-Experiment_#.##.mq5 (archive)
 ```
 
-### Revisions
+## Revisions
+Jules lost the archive during update, so, this is being revised... 
 - **001 (Archived)** - First major refactor. Introduced robust risk management (risk %) and greatly improved divergence detection using Fractals and RSI level filters.
 - **002 (Archived)** - Added enum-based Day Filter and refactored logic for on-bar calculations to improve efficiency.
 - **003 (Active)** - Based on a new, improved baseline from user. Adds a selectable base timeframe (`InpBaseTimeframe`) to decouple the EA's logic from the chart's timeframe.
