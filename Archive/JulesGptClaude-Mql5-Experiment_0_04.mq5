@@ -50,8 +50,8 @@ input int    InpAtrHistoryDays     = 30;         // Days of history for ATR anal
 //--- Global variables
 CTrade          trade;
 bool            isSymbolOk = false;
-bool            isTimeframeOk = false;
-string          gEaName = "JulesExperimentalMql5";
+//bool            isTimeframeOk = false; // This is now validated directly in OnInit
+string          gEaName = "JulesExperimentalMql5_v3";
 int             gOverallTrend = 0; // 1 for UP, -1 for DOWN, 0 for NONE
 
 //--- Indicator Handles
@@ -109,11 +109,9 @@ int OnInit()
       return(INIT_FAILED);
      }
 
-   isTimeframeOk = CheckTimeframe();
-   if(!isTimeframeOk)
+   if(!CheckTimeframe()) // Validation is now direct
      {
-      UpdateDisplay();
-      Print(gEaName, ": Initialization failed. The timeframe '", EnumToString(_Period), "' is not supported. Please use M15, M30, or H1.");
+      Print(gEaName, ": Initialization failed. The selected timeframe '", EnumToString(_Period), "' is not supported by this EA's logic.");
       return(INIT_FAILED);
      }
 
@@ -135,14 +133,13 @@ int OnInit()
    UpdateDisplay();
    return(INIT_SUCCEEDED);
   }
+
 //+------------------------------------------------------------------+
 //| Expert deinitialization function                                 |
 //+------------------------------------------------------------------+
 void OnDeinit(const int reason)
   {
-//--- Print deinitialization message
    Print(gEaName, " Deinitialized. Reason: ", reason);
-//--- Clean up the chart display
    Comment("");
 //--- Release indicator handles
    IndicatorRelease(ema50_handle_tf1);
@@ -155,6 +152,7 @@ void OnDeinit(const int reason)
    IndicatorRelease(atr_handle);
    IndicatorRelease(fractals_handle);
   }
+
 //+------------------------------------------------------------------+
 //| Expert tick function                                             |
 //+------------------------------------------------------------------+
@@ -187,6 +185,39 @@ void OnTick()
         }
      }
   }
+
+//+------------------------------------------------------------------+
+//| Performs all calculations that only need to run once per bar     |
+//+------------------------------------------------------------------+
+void OnNewBar()
+  {
+//--- Close positions if "Close on Bar End" is enabled
+   if(InpCloseOnBarEnd)
+     {
+      for(int i = PositionsTotal() - 1; i >= 0; i--)
+        {
+         ulong ticket = PositionGetTicket(i);
+         if(PositionGetInteger(POSITION_MAGIC) == InpMagicNumber && PositionGetString(POSITION_SYMBOL) == _Symbol)
+           {
+            if(!trade.PositionClose(ticket))
+              {
+               Print("Failed to close position #", ticket, ". Error: ", trade.ResultRetcode());
+              }
+            else
+              {
+               Print("Position #", ticket, " closed on new bar.");
+              }
+           }
+        }
+     }
+
+//--- Recalculate the overall trend
+   gOverallTrend = GetOverallTrend();
+
+//--- Update the display
+   UpdateDisplay();
+  }
+
 //+------------------------------------------------------------------+
 //| Update the on-screen display                                     |
 //+------------------------------------------------------------------+
@@ -217,6 +248,7 @@ void UpdateDisplay()
 
    Comment(displayString);
   }
+
 //+------------------------------------------------------------------+
 //| Execute a trade based on the trend direction                     |
 //+------------------------------------------------------------------+
@@ -251,9 +283,7 @@ void ExecuteTrade(int trend_direction)
      }
 
    ENUM_ORDER_TYPE trade_type;
-   double entry_price = 0;
-   double tp_price = 0;
-   double sl_price = 0;
+   double entry_price, tp_price, sl_price;
 
    if(trend_direction == 1) // Buy
      {
@@ -271,26 +301,23 @@ void ExecuteTrade(int trend_direction)
      }
 
    string comment = gEaName + " " + TimeToString(TimeCurrent());
-   trade.PositionOpen(_Symbol, trade_type, lot_size, entry_price, sl_price, tp_price, comment);
-   if(trade.ResultRetcode() != TRADE_RETCODE_DONE)
+   if(trade.PositionOpen(_Symbol, trade_type, lot_size, entry_price, sl_price, tp_price, comment))
      {
-      Print("Trade execution failed. Error: ", trade.ResultRetcode(), " - ", trade.ResultComment());
+      Print("Trade Executed: ", (trend_direction == 1 ? "BUY" : "SELL"),
+            " Lot:", lot_size, " Entry:", entry_price, " TP:", tp_price, " SL:", sl_price);
      }
    else
      {
-      Print("Trade executed successfully. Order #", trade.ResultOrder(), " Lot Size: ", lot_size);
+      Print("Trade Failed. Error: ", trade.ResultRetcode(), " - ", trade.ResultComment());
      }
   }
+
 //+------------------------------------------------------------------+
 //| Calculate Lot Size based on risk percentage and SL distance      |
 //+------------------------------------------------------------------+
 double CalculateLotSize(double sl_distance_points)
   {
-   if(sl_distance_points <= 0)
-     {
-      Print("Cannot calculate lot size: Stop Loss distance is zero or negative.");
-      return 0.0;
-     }
+   if(sl_distance_points <= 0) return 0.0;
 
    double account_balance = AccountInfoDouble(ACCOUNT_BALANCE);
    double tick_value = SymbolInfoDouble(_Symbol, SYMBOL_TRADE_TICK_VALUE);
@@ -299,32 +326,23 @@ double CalculateLotSize(double sl_distance_points)
    double min_lot = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MIN);
    double max_lot = SymbolInfoDouble(_Symbol, SYMBOL_VOLUME_MAX);
 
-   if(tick_value <= 0)
-     {
-      Print("Cannot calculate lot size: Tick value is zero or negative.");
-      return 0.0;
-     }
+   if(tick_value <= 0 || tick_size <= 0) return 0.0;
 
    double risk_amount = account_balance * (InpRiskPercent / 100.0);
    double sl_value_per_lot = (sl_distance_points / tick_size) * tick_value;
 
-   if(sl_value_per_lot <= 0)
-     {
-      Print("Cannot calculate lot size: Stop loss value per lot is zero or negative.");
-      return 0.0;
-     }
+   if(sl_value_per_lot <= 0) return 0.0;
 
    double lot_size = risk_amount / sl_value_per_lot;
 
    lot_size = floor(lot_size / lot_step) * lot_step;
 
-   if(lot_size < min_lot)
-      lot_size = min_lot;
-   if(lot_size > max_lot)
-      lot_size = max_lot;
+   if(lot_size < min_lot) lot_size = min_lot;
+   if(lot_size > max_lot) lot_size = max_lot;
 
    return lot_size;
   }
+
 //+------------------------------------------------------------------+
 //| Set the higher timeframes based on the chart's period            |
 //+------------------------------------------------------------------+
@@ -346,11 +364,12 @@ bool SetTimeframes()
          g_tf3 = PERIOD_D1;
          break;
       default:
-         return false; // Should not happen due to initial check
+         return false;
      }
-   Print("Timeframes set: ", EnumToString(g_tf1), ", ", EnumToString(g_tf2), ", ", EnumToString(g_tf3));
+   Print("Timeframes: ", EnumToString(g_tf1), ", ", EnumToString(g_tf2), ", ", EnumToString(g_tf3));
    return true;
   }
+
 //+------------------------------------------------------------------+
 //| Create all necessary indicator handles                           |
 //+------------------------------------------------------------------+
@@ -358,26 +377,27 @@ bool CreateIndicatorHandles()
   {
    ema50_handle_tf1 = iMA(_Symbol, g_tf1, 50, 0, MODE_EMA, PRICE_CLOSE);
    ema200_handle_tf1 = iMA(_Symbol, g_tf1, 200, 0, MODE_EMA, PRICE_CLOSE);
-   if(ema50_handle_tf1 == INVALID_HANDLE || ema200_handle_tf1 == INVALID_HANDLE) return false;
    ema50_handle_tf2 = iMA(_Symbol, g_tf2, 50, 0, MODE_EMA, PRICE_CLOSE);
    ema200_handle_tf2 = iMA(_Symbol, g_tf2, 200, 0, MODE_EMA, PRICE_CLOSE);
-   if(ema50_handle_tf2 == INVALID_HANDLE || ema200_handle_tf2 == INVALID_HANDLE) return false;
    ema50_handle_tf3 = iMA(_Symbol, g_tf3, 50, 0, MODE_EMA, PRICE_CLOSE);
    ema200_handle_tf3 = iMA(_Symbol, g_tf3, 200, 0, MODE_EMA, PRICE_CLOSE);
-   if(ema50_handle_tf3 == INVALID_HANDLE || ema200_handle_tf3 == INVALID_HANDLE) return false;
+
+   if(ema50_handle_tf1 == INVALID_HANDLE || ema200_handle_tf1 == INVALID_HANDLE ||
+      ema50_handle_tf2 == INVALID_HANDLE || ema200_handle_tf2 == INVALID_HANDLE ||
+      ema50_handle_tf3 == INVALID_HANDLE || ema200_handle_tf3 == INVALID_HANDLE)
+      return false;
 
    rsi_handle = iRSI(_Symbol, g_tf1, InpRsiPeriod, PRICE_CLOSE);
-   if(rsi_handle == INVALID_HANDLE) return false;
-
    atr_handle = iATR(_Symbol, PERIOD_D1, InpAtrPeriod);
-   if(atr_handle == INVALID_HANDLE) return false;
-
    fractals_handle = iFractals(_Symbol, g_tf1);
-   if(fractals_handle == INVALID_HANDLE) return false;
 
-   Print("Indicator handles created successfully.");
+   if(rsi_handle == INVALID_HANDLE || atr_handle == INVALID_HANDLE || fractals_handle == INVALID_HANDLE)
+      return false;
+
+   Print("All indicator handles created successfully.");
    return true;
   }
+
 //+------------------------------------------------------------------+
 //| Adapts TP based on recent average volatility (ATR)               |
 //+------------------------------------------------------------------+
@@ -385,16 +405,15 @@ void AdaptParameters()
   {
    gAdaptedTakeProfit = InpTakeProfit * _Point;
 
-   if(!InpAdaptParameters)
+   if(!InpAdaptParameters || atr_handle == INVALID_HANDLE)
      {
-      Print("Parameter adaptation is disabled by user.");
       return;
      }
 
    double atr_buffer[];
    if(CopyBuffer(atr_handle, 0, 1, InpAtrHistoryDays, atr_buffer) < InpAtrHistoryDays)
      {
-      Print("Could not copy enough ATR history (", InpAtrHistoryDays, " days). Using default TP.");
+      Print("Insufficient ATR history. Using default TP.");
       return;
      }
 
@@ -416,9 +435,11 @@ void AdaptParameters()
 
    gAdaptedTakeProfit = average_atr * 1.5 * timeframe_multiplier;
 
-   Print("Parameter Adaptation Complete. Average ATR(", InpAtrPeriod, ") over last ", InpAtrHistoryDays, " days: ", NormalizeDouble(average_atr, _Digits));
-   Print("Adapted Take Profit set to: ", NormalizeDouble(gAdaptedTakeProfit, _Digits), " (", gAdaptedTakeProfit / _Point, " points)");
+   Print("ATR Adaptation: Avg ATR=", NormalizeDouble(average_atr, _Digits),
+         " Adapted TP=", NormalizeDouble(gAdaptedTakeProfit, _Digits),
+         " (", NormalizeDouble(gAdaptedTakeProfit/_Point, 0), " points)");
   }
+
 //+------------------------------------------------------------------+
 //| Determine the overall trend based on 3 timeframes                |
 //+------------------------------------------------------------------+
@@ -445,6 +466,7 @@ int GetOverallTrend()
 
    return 0;
   }
+
 //+------------------------------------------------------------------+
 //| Check if the symbol is a valid gold pair                         |
 //+------------------------------------------------------------------+
@@ -453,11 +475,9 @@ bool CheckSymbol()
    string symbol = _Symbol;
    StringToUpper(symbol);
 
-   if(StringFind(symbol, "XAU") != -1 || StringFind(symbol, "GOLD") != -1)
-      return true;
-
-   return false;
+   return (StringFind(symbol, "XAU") != -1 || StringFind(symbol, "GOLD") != -1);
   }
+
 //+------------------------------------------------------------------+
 //| Checks if trading is allowed on the current day of the week      |
 //+------------------------------------------------------------------+
@@ -465,67 +485,25 @@ bool IsTradingDayAllowed()
   {
    MqlDateTime current_time;
    TimeCurrent(current_time);
-   int day_of_week = current_time.day_of_week; // 0=Sun, 1=Mon, ..., 6=Sat
+   int day_of_week = current_time.day_of_week;
 
    switch(InpDayFilter)
      {
-      case FULL_WEEK:
-         return (day_of_week >= 1 && day_of_week <= 5);
-      case MON_TUE:
-         return (day_of_week == 1 || day_of_week == 2);
-      case TUE_THUR:
-         return (day_of_week >= 2 && day_of_week <= 4);
-      case MON_FRI:
-         return (day_of_week == 1 || day_of_week == 5);
-      case THU_FRI:
-         return (day_of_week == 4 || day_of_week == 5);
-      case TUE_THU_FRI:
-         return (day_of_week == 2 || day_of_week == 4 || day_of_week == 5);
-      case MON_TUE_WED:
-         return (day_of_week >= 1 && day_of_week <= 3);
-      case WED_THU_FRI:
-         return (day_of_week >= 3 && day_of_week <= 5);
-      case NOT_MON:
-         return (day_of_week != 1 && day_of_week >= 1 && day_of_week <= 5);
-      case NOT_WED:
-         return (day_of_week != 3 && day_of_week >= 1 && day_of_week <= 5);
-      case NOT_FRI:
-         return (day_of_week != 5 && day_of_week >= 1 && day_of_week <= 5);
-      default:
-         return true; // Should not happen, default to true
+      case FULL_WEEK:      return (day_of_week >= 1 && day_of_week <= 5);
+      case MON_TUE:        return (day_of_week == 1 || day_of_week == 2);
+      case TUE_THUR:       return (day_of_week >= 2 && day_of_week <= 4);
+      case MON_FRI:        return (day_of_week == 1 || day_of_week == 5);
+      case THU_FRI:        return (day_of_week == 4 || day_of_week == 5);
+      case TUE_THU_FRI:    return (day_of_week == 2 || day_of_week == 4 || day_of_week == 5);
+      case MON_TUE_WED:    return (day_of_week >= 1 && day_of_week <= 3);
+      case WED_THU_FRI:    return (day_of_week >= 3 && day_of_week <= 5);
+      case NOT_MON:        return (day_of_week != 1 && day_of_week >= 2 && day_of_week <= 5);
+      case NOT_WED:        return (day_of_week != 3 && day_of_week >= 1 && day_of_week <= 5);
+      case NOT_FRI:        return (day_of_week != 5 && day_of_week >= 1 && day_of_week <= 4);
+      default:             return true;
      }
   }
-//+------------------------------------------------------------------+
-//| Performs all calculations that only need to run once per bar     |
-//+------------------------------------------------------------------+
-void OnNewBar()
-  {
-//--- Close positions if "Close on Bar End" is enabled
-   if(InpCloseOnBarEnd)
-     {
-      for(int i = PositionsTotal() - 1; i >= 0; i--)
-        {
-         ulong ticket = PositionGetTicket(i);
-         if(PositionGetInteger(POSITION_MAGIC) == InpMagicNumber && PositionGetString(POSITION_SYMBOL) == _Symbol)
-           {
-            if(!trade.PositionClose(ticket))
-              {
-               Print("Failed to close position #", ticket, ". Error: ", trade.ResultRetcode());
-              }
-            else
-              {
-               Print("Position #", ticket, " closed on new bar.");
-              }
-           }
-        }
-     }
 
-//--- Recalculate the overall trend
-   gOverallTrend = GetOverallTrend();
-
-//--- Update the display
-   UpdateDisplay();
-  }
 //+------------------------------------------------------------------+
 //| Check for bullish RSI divergence using Fractals                      |
 //+------------------------------------------------------------------+
@@ -574,6 +552,7 @@ bool CheckBullishDivergence()
 
    return false;
   }
+
 //+------------------------------------------------------------------+
 //| Check for bearish RSI divergence using Fractals                     |
 //+------------------------------------------------------------------+
@@ -630,4 +609,5 @@ bool CheckTimeframe()
    ENUM_TIMEFRAMES tf = _Period;
    return (tf == PERIOD_M15 || tf == PERIOD_M30 || tf == PERIOD_H1);
   }
+
 //+------------------------------------------------------------------+
