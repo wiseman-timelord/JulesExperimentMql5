@@ -56,3 +56,8 @@ The core trading strategy is based on three main components:
 *   `InpAdaptParameters`: Set to `true` to enable automatic TP/SL adaptation based on volatility (ATR).
 *   `InpAtrPeriod`: The period for the ATR indicator.
 *   `InpAtrHistoryDays`: The number of days of history to analyze for the ATR calculation.
+
+### Revisions
+- 001 - first working version ~1500 from 1000 in 1 year.
+- 002 - supposedly corrupt version, earns 12000 from 1000 in 1 year. Interesting but not useful.
+- 003 - 1600 from 1000 in 1 year (before adding timeframe filter). Improved version. 
