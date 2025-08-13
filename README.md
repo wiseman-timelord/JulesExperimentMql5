@@ -5,12 +5,12 @@ Status: Alpha (experimental until further notice).
 Its an experiment, to see if Jules can automate making a profitable EA. This is main branch you are reading, while [THIS](https://github.com/wiseman-timelord/JulesGPTClaude-Mql5-Experiment/branches) shows the work being done recently by Jules . As the name suggests, this is an experimental MetaTrader 5 (MT5) Expert Advisor (EA) created by Jules (primary) + Claude + GPT + Kimi K1.5/K2. It is designed to trade gold pairs (XAUUSD, GOLD) using a specific trend-following and divergence strategy. It detects general trends, checks for divergence and is supposed to place an order in general trend direction when it returns to trend direction, in order to trade in direction with logical rebound protection. The philosophy behind the strategy is, while individual waves come and go, the tide has its generally predictable direction.
 
 ### Media
-- Until Live testing is done, nothing is known for sure, but it can theoretically do from $1000 to $10000 in 1 year.
+Until Live testing is done, nothing is known for sure, but backtests are showing, From £1000 to £10000 and from £100 to £500, in 1 year...
 
 ![Image Of Backtest 1000-10000](./Media/ResultsFrom1000.jpg)
+![Image Of Backtest 1000-10000](./Media/ResultsFrom100.jpg)
 
-- Working on backtest for £100-???? currently. 
-- Also There will be the best result from the 100-1000 and 1000-????.
+- Also There will be the best result from both?.
 
 ## How to Use
 1. Place latest `JulesExperimentalMql5_###.mq5` file into your `MQL5/Experts/` directory.
