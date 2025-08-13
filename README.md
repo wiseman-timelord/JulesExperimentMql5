@@ -11,7 +11,7 @@ Its an experiment, to see if Jules can automate making a profitable EA. This is 
 4.  click **"Compile"**.
 5.  In the MT5 Strategy Tester (Ctrl+R), select the `JulesExperimentalMql5_003` expert to test the latest version.
 
-## Input Parameters
+### Input Params
 *   `InpBaseTimeframe`: The core timeframe for the EA's logic (M15, M30, etc.).
 *   `InpMagicNumber`: A unique number to identify trades opened by this EA.
 *   `InpLotSize`: The fixed lot size. Only used if `InpUseRiskPercent` is `false`.
