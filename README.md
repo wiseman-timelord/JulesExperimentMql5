@@ -22,28 +22,28 @@ Its an experiment, to see if Jules can automate making a profitable EA. This is 
 5. After configuration, then ensure you have CPU threads commited optimally, and click start, though this may take some time even on newer processor.
 6. After Backtesting done, it show how results are doing for the EA on the pair.
 
-### Input Params (not in the correct order currently)
-*   `InpBaseTimeframe`: The core timeframe for the EA's logic (M15, M30, etc.).
-*   `InpMagicNumber`: A unique number to identify trades opened by this EA.
-*   `InpLotSize`: The fixed lot size. Only used if `InpUseRiskPercent` is `false`.
-*   `InpMaxSpread`: The maximum allowed spread in points.
-*   `InpTakeProfit`: The Take Profit in points. Only used if `InpAdaptParameters` is `false`.
-*   `InpStopLossRatio`: The Stop Loss size as a ratio of the Take Profit.
-*   `InpCloseOnBarEnd`: If `true`, closes any open trade at the start of a new bar.
+### Input Params
+*   `InpMagicNumber`: A unique number to identify trades opened by this EA. (1000-9999)
+*   `InpMaxSpread`: The maximum allowed spread in points. Gold typical (10-50)
 *   `InpDayFilter`: Dropdown menu to select which days of the week to trade.
+*   `InpBaseTimeframe`: The core timeframe for the EA's logic (M15, M30, etc.).
+*   `InpRsiPeriod`: The period for the RSI indicator. standard (8-21)
+*   `InpDivergenceLookback`: The number of bars to look back on to find a divergence pattern. Gold optimized (20-80)
+*   `InpRsiOverbought`: The RSI level above which a bearish divergence is considered valid. Gold tuned (70-80)
+*   `InpRsiOversold`: The RSI level below which a bullish divergence is considered valid. Gold tuned (20-30)
+*   `InpMinFractalDistance`: The minimum bars required between two fractals. Gold sensitivity (2-8)
+*   `InpMaxTradesPerDay`: The maximum number of trades allowed per day. Gold frequency (1-6)
+*   `InpTakeProfit`: The Take Profit in points. Only used if `InpAdaptParameters` is `false`. Gold optimized (300-2000)
+*   `InpStopLossRatio`: The Stop Loss size as a ratio of the Take Profit. Gold volatility (1.2-2.5)
+*   `InpCloseOnBarEnd`: If `true`, closes any open trade at the start of a new bar.
+*   `InpLotSize`: The fixed lot size. Only used if `InpUseRiskPercent` is `false`. (0.01-1.0)
 *   `InpUseRiskPercent`: If `true`, the EA will automatically calculate the lot size based on `InpRiskPercent`.
-*   `InpRiskPercent`: The percentage of the account balance to risk on a single trade.
-*   `InpMaxDailyLoss`: The max percentage of daily balance to lose before stopping for the day.
-*   `InpMaxTradesPerDay`: The maximum number of trades allowed per day.
-*   `InpRsiPeriod`: The period for the RSI indicator.
-*   `InpDivergenceLookback`: The number of bars to look back on to find a divergence pattern.
-*   `InpRsiOverbought`: The RSI level above which a bearish divergence is considered valid.
-*   `InpRsiOversold`: The RSI level below which a bullish divergence is considered valid.
-*   `InpMinFractalDistance`: The minimum bars required between two fractals.
+*   `InpRiskPercent`: The percentage of the account balance to risk on a single trade. Gold suitable (0.5-3.0)
+*   `InpMaxDailyLoss`: The max percentage of daily balance to lose before stopping for the day. Gold protection (2.0-8.0)
 *   `InpAdaptParameters`: Set to `true` to enable automatic TP/SL adaptation based on volatility (ATR).
-*   `InpAtrPeriod`: The period for the ATR indicator.
-*   `InpAtrHistoryDays`: The number of days of history to analyze for the ATR calculation.
-*   `InpVolatilityMultiplier`: The multiplier for the ATR value when calculating the adapted TP.
+*   `InpAtrPeriod`: The period for the ATR indicator. (10-21)
+*   `InpAtrHistoryDays`: The number of days of history to analyze for the ATR calculation. Gold analysis (15-45)
+*   `InpVolatilityMultiplier`: The multiplier for the ATR value when calculating the adapted TP. Gold calibrated (0.8-2.0)
 
 ## Notation
 - Processing could take several hours even on a 20 thread processor, and each thread will require 1GB ram for each thread, for 1 year M1 Every Tick.
