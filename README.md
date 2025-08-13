@@ -49,6 +49,7 @@ Its an experiment, to see if Jules can automate making a profitable EA. This is 
 - Processing could take several hours even on a 20 thread processor, and each thread will require 1GB ram for each thread, for 1 year M1 Every Tick.
 - OHLC may be ok if you select "Close At End Of Bar" to "True" in the EA, and it may be somewhat acurate with M1 OHLC, but personally I am going by the "Every Tick". The theory is in relevance to spikes, they will potentially break SL that in OHLC would have been still within safe zone.
 - If you use this EA and gain actual profit, then you should also be supporting my work appropriately via, Patreon or Kofi, (see my profile).
+- Also making some indicators, to better illustrate trend directions, [Auto-Lines](https://github.com/wiseman-timelord/Auto-LinesStatsEtc-ML) and [GoldWeekly](https://github.com/wiseman-timelord/GoldWeekly-Mt5). They will likely be developed along-side, as they enable better visual diagnosis of trends.  
 
 ## File Structure
 ```
@@ -65,4 +66,4 @@ Its an experiment, to see if Jules can automate making a profitable EA. This is 
 
 ## Credits/links
 - [Google Jules](https://jules.google.com) was used, it did all the thinking, produce the bulk of the code, then bugfixed it before first response, which if any issues with, can be thrown into other AI simple, as just 1 script.
-- Other AI such as, [Kimi](https://www.kimi.com/chat), [Claude](https://claude.ai/chat), [Gpt](https://chatgpt.com/), were used, mainly for fix or adaption. Repasting back into Jules, where jules would then have explained what you did in what AI, and what to do next. 
+- Other AI such as, [Kimi](https://www.kimi.com/chat), [Claude](https://claude.ai/chat), [Gpt](https://chatgpt.com/), were used, mainly for fix or adaption. Repasting back into Jules, where jules would then have explained what you did in what AI, and what to do next.
