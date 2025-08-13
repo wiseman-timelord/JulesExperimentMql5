@@ -34,6 +34,13 @@ Its an experiment, to see if Jules can automate making a profitable EA. This is 
 *   `InpAtrHistoryDays`: The number of days of history to analyze for the ATR calculation.
 *   `InpVolatilityMultiplier`: The multiplier for the ATR value when calculating the adapted TP.
 
+## File Structure
+```
+.\JulesGptClaude-Mql5-Experiment_#.##.mq5 (current)
+.\Archive\
+.\Archive\JulesGptClaude-Mql5-Experiment_#.##.mq5 (archive)
+```
+
 ### Revisions
 - **001 (Archived)** - First major refactor. Introduced robust risk management (risk %) and greatly improved divergence detection using Fractals and RSI level filters.
 - **002 (Archived)** - Added enum-based Day Filter and refactored logic for on-bar calculations to improve efficiency.
