@@ -5,11 +5,14 @@ Description:
 Its an experiment, to see if Jules can automate making a profitable EA. This is main branch you are reading, while [THIS] shows the work being done recently by Jules (https://github.com/wiseman-timelord/JulesGPTClaude-Mql5-Experiment/tree/). As the name suggests, this is an experimental MetaTrader 5 (MT5) Expert Advisor (EA) created by Jules (primary) + Claude + GPT + Kimi K1.5/K2. It is designed to trade gold pairs (XAUUSD, GOLD) using a specific trend-following and divergence strategy. It detects general trends, checks for divergence and is supposed to place an order in general trend direction when it returns to trend direction, in order to trade in direction with logical rebound protection. 
 
 ## How to Use
-1.  Place all `JulesExperimentalMql5_###.mq5` files into your `MQL5/Experts/` directory (you can place the `_001` and `_002` files into a subfolder like `Archived/`).
-2.  Open the **MetaEditor** (F4).
-3.  In the Navigator, find and open `JulesExperimentalMql5_003.mq5`.
-4.  click **"Compile"**.
-5.  In the MT5 Strategy Tester (Ctrl+R), select the `JulesExperimentalMql5_003` expert to test the latest version.
+1. Place latest `JulesExperimentalMql5_###.mq5` file into your `MQL5/Experts/` directory.
+2. Open the EA script **MetaEditor**  click **"Compile"**, then close the editor.
+3. Move the `.set` file provided into the "~/profiles/" folder.
+4. Run MetaTrader 5 and open Strategy tester.
+3. In Strategy Tester, find and se;ect `JulesExperimentalMql5_#_##`. ensure to use the provided set file for default settings, and put on a gold pair, set data in Metatrader to M1/everyTick/ and mode to genetic backtest and for a time period of previous 1 Year. 
+5. After configuration Then click start, though this may take several hours even on a 20 thread processor due to every tick data.
+
+- OHLC may be ok if you select "Close At End Of Bar" to "True" in the EA, and it may be somewhat acurate with M1 OHLC, but personally I am going by the "Every Tick"
 
 ### Input Params
 *   `InpBaseTimeframe`: The core timeframe for the EA's logic (M15, M30, etc.).
