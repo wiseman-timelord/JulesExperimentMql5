@@ -9,6 +9,8 @@ Its an experiment, to see if Jules can automate making a profitable EA. This is 
 
 ![Image Of Backtest 1000-10000](./Media/ResultsFrom1000.jpg)
 
+- Working on backtest for £100-???? currently.
+
 ## How to Use
 1. Place latest `JulesExperimentalMql5_###.mq5` file into your `MQL5/Experts/` directory.
 2. Open the EA script **MetaEditor**  click **"Compile"**, then close the editor.
