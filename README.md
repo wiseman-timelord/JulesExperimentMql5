@@ -11,7 +11,7 @@ Its an experiment, to see if Jules can automate making a profitable EA. This is 
 4. Run MetaTrader 5 and open Strategy tester.
 3. In Strategy Tester, find and se;ect `JulesExperimentalMql5_#_##`. Set Balance to equiv =>£1000 (theoretical min £250), and put on a gold pair, set data to M1/everyTick/ and mode to genetic backtest and for a time period of previous 1 Year. 
 4. In the EA's settings, ensure to use the provided set file for default settings, and tweak for your own intrests, though the AI recommended value ranges are there in input comments.
-5. After configuration Then click start, though this may take some time.
+5. After configuration, then ensure you have CPU threads commited optimally, and click start, though this may take some time even on newer processor.
 6. After Backtesting done, it show how results are doing for the EA on the pair.
 
 ### Input Params (not in the correct order currently)
