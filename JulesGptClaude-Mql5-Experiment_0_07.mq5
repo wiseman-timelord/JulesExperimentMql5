@@ -37,10 +37,10 @@ enum ENUM_BASE_TIMEFRAME
   };
 
 //--- EA Input Parameters
-input ENUM_BASE_TIMEFRAME InpBaseTimeframe = TF_M15; // Base timeframe for trading signals
 input ulong  InpMagicNumber = 1337;      // Magic Number (1000-9999)
 input int    InpMaxSpread   = 30;         // Max spread in points - Gold typical (10-50)
 input Custom_Dayfilter_Config InpDayFilter = FULL_WEEK; // Trading days filter
+input ENUM_BASE_TIMEFRAME InpBaseTimeframe = TF_M15; // Base timeframe for trading signals
 
 //--- Indicator Settings
 input int    InpRsiPeriod   = 14;         // RSI Period - standard (8-21)
@@ -50,14 +50,14 @@ input int    InpRsiOversold   = 25;       // RSI oversold level - Gold tuned (20
 input int    InpMinFractalDistance = 3;   // Min bars between fractals - Gold sensitivity (2-8)
 
 //--- Lot Tp Sl Management
-input bool   InpUseRiskPercent = true;    // Use % of balance for position sizing
-input double InpRiskPercent    = 1.5;     // Risk per trade % - Gold suitable (0.5-3.0)
-input double InpMaxDailyLoss   = 4.0;     // Max daily loss % - Gold protection (2.0-8.0)
 input int    InpMaxTradesPerDay = 4;      // Max trades per day - Gold frequency (1-6)
-input double InpLotSize     = 0.01;       // Fixed Lot Size (0.01-1.0)
 input int    InpTakeProfit  = 800;        // Take Profit in points - Gold optimized (300-2000)
 input double InpStopLossRatio = 1.8;      // Stop Loss ratio to TP - Gold volatility (1.2-2.5)
 input bool   InpCloseOnBarEnd = false;    // Close trades at bar end
+input double InpLotSize     = 0.01;       // Fixed Lot Size (0.01-1.0)
+input bool   InpUseRiskPercent = true;    // Use % of balance for position sizing
+input double InpRiskPercent    = 1.5;     // Risk per trade % - Gold suitable (0.5-3.0)
+input double InpMaxDailyLoss   = 4.0;     // Max daily loss % - Gold protection (2.0-8.0)
 
 //--- Parameter Adaptation Settings
 input bool   InpAdaptParameters    = true;       // Adapt TP/SL to volatility
