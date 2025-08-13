@@ -11,7 +11,6 @@ Its an experiment, to see if Jules can automate making a profitable EA. This is 
 4. Run MetaTrader 5 and open Strategy tester.
 3. In Strategy Tester, find and se;ect `JulesExperimentalMql5_#_##`. ensure to use the provided set file for default settings, and put on a gold pair, set data in Metatrader to M1/everyTick/ and mode to genetic backtest and for a time period of previous 1 Year. 
 5. After configuration Then click start, though this may take several hours even on a 20 thread processor due to every tick data.
-
 - OHLC may be ok if you select "Close At End Of Bar" to "True" in the EA, and it may be somewhat acurate with M1 OHLC, but personally I am going by the "Every Tick"
 
 ### Input Params
