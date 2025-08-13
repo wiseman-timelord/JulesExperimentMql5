@@ -1,8 +1,8 @@
-# The JulesGPTClaude-Mql5-Experiment
+# The JulesGPTClaudeKimi-Mql5-Experiment
 Status: Alpha, major updates going on until further notice.
 
 Description:
-Its an experiment, to see if Jules can automate making a profitable EA. This is main branch you are reading, while [THIS](https://github.com/wiseman-timelord/JulesExperimentMql5/tree/feat/jules-experimental-ea) is the active Jules branch. As the name suggests, this is an experimental MetaTrader 5 (MT5) Expert Advisor (EA) created by Jules (primary) + Claude + GPT. It is designed to trade gold pairs (XAUUSD, GOLD) using a specific trend-following and divergence strategy. It detects general trends, checks for divergence and is supposed to place an order in general trend direction when it returns to trend direction, in order to trade in direction with logical rebound protection. 
+Its an experiment, to see if Jules can automate making a profitable EA. This is main branch you are reading, while [THIS] shows the work being done recently by Jules (https://github.com/wiseman-timelord/JulesGPTClaude-Mql5-Experiment/tree/). As the name suggests, this is an experimental MetaTrader 5 (MT5) Expert Advisor (EA) created by Jules (primary) + Claude + GPT + Kimi K1.5/K2. It is designed to trade gold pairs (XAUUSD, GOLD) using a specific trend-following and divergence strategy. It detects general trends, checks for divergence and is supposed to place an order in general trend direction when it returns to trend direction, in order to trade in direction with logical rebound protection. 
 
 ## How to Use
 1.  Place all `JulesExperimentalMql5_###.mq5` files into your `MQL5/Experts/` directory (you can place the `_001` and `_002` files into a subfolder like `Archived/`).
