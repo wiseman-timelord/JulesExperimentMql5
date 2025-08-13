@@ -10,7 +10,7 @@ Until Live testing is done, nothing is known for sure, but Every-Tick backtests 
 ![Image Of Backtest 1000-10000](./Media/ResultsFrom1000.jpg)
 ![Image Of Backtest 1000-10000](./Media/BestFrom1000.jpg)
 
-...and from £100 to ~£580 in 1 year (which then came out better in single pass)...
+...and from £100 to ~£580 in 1 year...
 
 ![Image Of Backtest 1000-10000](./Media/ResultsFrom100.jpg)
 ![Image Of Backtest 1000-10000](./Media/BestFrom100.jpg)
