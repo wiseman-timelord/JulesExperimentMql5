@@ -38,3 +38,4 @@ This is an experimental MetaTrader 5 (MT5) Expert Advisor (EA) created by Jules 
 - 001 - first working version ~1500 from 1000 in 1 year.
 - 002 - supposedly corrupt version, earns 12000 from 1000 in 1 year. Interesting but not useful.
 - 003 - 1600 from 1000 in 1 year (before adding timeframe filter). Improved version.
+- 003 (This version) - Adds selectable base timeframe for all logic.

@@ -65,7 +65,7 @@ input double InpVolatilityMultiplier = 1.2;     // ATR multiplier for TP - Gold 
 //--- Global variables
 CTrade          trade;
 bool            isSymbolOk = false;
-//bool            isTimeframeOk = false; // No longer needed, validation is direct
+//bool            isTimeframeOk = false; // This is now validated directly in OnInit
 string          gEaName = "JulesExperimentalMql5_v3";
 int             gOverallTrend = 0; // 1 for UP, -1 for DOWN, 0 for NONE
 
@@ -456,9 +456,8 @@ void UpdateDisplay()
       displayString += "Error: Gold Pair Only (e.g., XAUUSD, GOLD)\n";
 
 //--- Display Timeframe Info
-   displayString += "Base TF: " + EnumToString((ENUM_TIMEFRAMES)InpBaseTimeframe) + " | Chart: " + EnumToString(_Period) + "\n";
+   displayString += "Base TF: " + EnumToString((ENUM_TIMEFRAMES)InpBaseTimeframe) + " | Chart TF: " + EnumToString(_Period) + "\n";
    displayString += "Higher TFs: " + EnumToString(g_tf2) + ", " + EnumToString(g_tf3) + "\n";
-
 
 //--- Display Trend Info
    string trend_status = "Calculating...";
