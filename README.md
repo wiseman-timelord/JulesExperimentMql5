@@ -9,7 +9,8 @@ Its an experiment, to see if Jules can automate making a profitable EA. This is 
 
 ![Image Of Backtest 1000-10000](./Media/ResultsFrom1000.jpg)
 
-- Working on backtest for £100-???? currently.
+- Working on backtest for £100-???? currently. 
+- Also There will be the best result from the 100-1000 and 1000-????.
 
 ## How to Use
 1. Place latest `JulesExperimentalMql5_###.mq5` file into your `MQL5/Experts/` directory.
