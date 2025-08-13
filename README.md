@@ -13,9 +13,7 @@ Until Live testing is done, nothing is known for sure, but Every-Tick backtests 
 ...and from £100 to ~£580 in 1 year (which then came out better in single pass)...
 
 ![Image Of Backtest 1000-10000](./Media/ResultsFrom100.jpg)
-![Image Of Backtest 1000-10000](./Media/BestFrom1000.jpg)
-
-...observation, result gets better when better quality data is used (which is a good sign).
+![Image Of Backtest 1000-10000](./Media/BestFrom100.jpg)
 
 ## How to Use
 1. Place latest `JulesExperimentalMql5_###.mq5` file into your `MQL5/Experts/` directory.
