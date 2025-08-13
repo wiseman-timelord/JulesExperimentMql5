@@ -8,10 +8,12 @@ Its an experiment, to see if Jules can automate making a profitable EA. This is 
 Until Live testing is done, nothing is known for sure, but backtests are showing, From £1000 to £10000...
 
 ![Image Of Backtest 1000-10000](./Media/ResultsFrom1000.jpg)
+![Image Of Backtest 1000-10000](./Media/BestFrom1000.jpg)
 
 ...and from £100 to £600, in 1 year...
 
 ![Image Of Backtest 1000-10000](./Media/ResultsFrom100.jpg)
+![Image Of Backtest 1000-10000](./Media/BestFrom1000.jpg)
 
 - Also There will be the best result from both?.
 
