@@ -40,6 +40,7 @@ Its an experiment, to see if Jules can automate making a profitable EA. This is 
 ## Notation
 - Processing could take several hours even on a 20 thread processor, and each thread will require 1GB ram for each thread, for 1 year M1 Every Tick.
 - OHLC may be ok if you select "Close At End Of Bar" to "True" in the EA, and it may be somewhat acurate with M1 OHLC, but personally I am going by the "Every Tick". The theory is in relevance to spikes, they will potentially break SL that in OHLC would have been still within safe zone.
+- If you use this EA and gain profit, then you should support appropriately via, Patreon or Kofi, (see my profile).
 
 ## File Structure
 ```
