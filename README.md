@@ -61,5 +61,5 @@ Its an experiment, to see if Jules can automate making a profitable EA. This is 
 - I still not sure if the results are trustworthy yet, live testing on demo account required.
 
 ## Credits/links
-- [Jules AI](https://jules.google.com) was used, it did all the thinking, produce the bulk of the code, then bugfixed it before first response, which if any issues with, can be thrown into other AI simple, as just 1 script.
+- [Google Jules](https://jules.google.com) was used, it did all the thinking, produce the bulk of the code, then bugfixed it before first response, which if any issues with, can be thrown into other AI simple, as just 1 script.
 - Other AI such as, [Kimi](https://www.kimi.com/chat), [Claude](https://claude.ai/chat), [Gpt](https://chatgpt.com/), were used, mainly for fix or adaption. Repasting back into Jules, where jules would then have explained what you did in what AI, and what to do next. 
