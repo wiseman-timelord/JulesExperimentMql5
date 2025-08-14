@@ -68,8 +68,8 @@ Until Live testing is done, nothing is known for sure, but Every-Tick backtests 
 - I still not sure if the results are trustworthy yet, live testing on demo account required.
 
 ### Current Revisions
-- 007 - As shown in the images, however, the `InpAdaptParameters` option true, will completely negate any TP/SL user enters.
-- 008 - Working on `InpAdaptParameters` to be a modifier of the base TP/SL.
+- 007 - As shown in the images, however, the `InpAdaptParameters` option true, will completely negate any TP/SL user enters. Same with `InpUseRiskPercent` and lot size.
+- 008 - Working on `InpAdaptParameters` to be a modifier of the base TP/SL, and `InpUseRiskPercent` for lot size. This way it will tune the base value instead of replace it.
 
 ## Credits/links
 - [Google Jules](https://jules.google.com) was used, it did all the thinking, produce the bulk of the code, then bugfixed it before first response, which if any issues with, can be thrown into other AI simple, as just 1 script.
