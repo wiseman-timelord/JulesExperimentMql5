@@ -67,6 +67,10 @@ Until Live testing is done, nothing is known for sure, but Every-Tick backtests 
 - Repeat checks for soundness/logic of code, ensuring Mql5 is the format.
 - I still not sure if the results are trustworthy yet, live testing on demo account required.
 
+### Current Revisions
+- 007 - As shown in the images, however, the `InpAdaptParameters` option true, will completely negate any TP/SL user enters.
+- 008 - Working on `InpAdaptParameters` to be a modifier of the base TP/SL.
+
 ## Credits/links
 - [Google Jules](https://jules.google.com) was used, it did all the thinking, produce the bulk of the code, then bugfixed it before first response, which if any issues with, can be thrown into other AI simple, as just 1 script.
 - Other AI such as, [Kimi](https://www.kimi.com/chat), [Claude](https://claude.ai/chat), [Gpt](https://chatgpt.com/), were used, mainly for fix or adaption. Repasting back into Jules, where jules would then have explained what you did in what AI, and what to do next.
