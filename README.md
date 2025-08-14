@@ -68,6 +68,7 @@ Its an experiment, to see if Jules can automate making a profitable EA. This is 
 - Occasional focus on keeeping things optimized.
 - Repeat checks for soundness/logic of code, ensuring Mql5 is the format.
 - I still not sure if the results are trustworthy yet, live testing on demo account required.
+- Some kind of issue when "Close On End Of Bar" is enabled, with, Every Tick and OHLC.
 
 ### Current Revisions
 - 007 - As shown in the images, however, the `InpAdaptParameters` option true, will completely negate any TP/SL user enters. Same with `InpUseRiskPercent` and lot size. On ths flipside, by automating these parameters we have only 25,000,000 passes for backtesting, so genetic backtest is reasonably acceptable accuracy.
