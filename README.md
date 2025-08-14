@@ -68,7 +68,7 @@ Until Live testing is done, nothing is known for sure, but Every-Tick backtests 
 - I still not sure if the results are trustworthy yet, live testing on demo account required.
 
 ### Current Revisions
-- 007 - As shown in the images, however, the `InpAdaptParameters` option true, will completely negate any TP/SL user enters. Same with `InpUseRiskPercent` and lot size. On ths flipside, by automating these parameters we have only 76,000,000 passes for backtesting, so genetic backtest is reasonably acceptable accuracy.
+- 007 - As shown in the images, however, the `InpAdaptParameters` option true, will completely negate any TP/SL user enters. Same with `InpUseRiskPercent` and lot size. On ths flipside, by automating these parameters we have only 25,000,000 passes for backtesting, so genetic backtest is reasonably acceptable accuracy.
 - 008 - Working on `InpAdaptParameters` to be a modifier of the base TP/SL, and `InpUseRiskPercent` for lot size. This way it will tune the base value instead of replace it. On the flipside, backtest passes may be ##,000,000,000, we will see.
 
 ## Credits/links
